@@ -1,0 +1,7 @@
+langchain
+langchain-huggingface
+python-dotenv
+fastapi
+uvicorn
+fastmcp
+streamlit
