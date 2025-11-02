@@ -3,6 +3,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph_supervisor import create_supervisor
 from typing import TypedDict,Annotated
 import sqlite3
+import os
 
 # Agent state
 class AgentState(TypedDict):
@@ -12,7 +13,7 @@ class AgentState(TypedDict):
 conn=sqlite3.connect('supervisor_agent.db',check_same_thread=False)
 memory=SqliteSaver(conn=conn)
 
-def create_supervisor_agent(agents,llm,prompt):
-    supervisor=create_supervisor(supervisor_name="MedAssist",agents=agents,model=llm,prompt=prompt)
+def create_supervisor_agent(agents,llm):
+    supervisor=create_supervisor(supervisor_name="MedAssist",agents=agents,model=llm,prompt=open("prompts/supervisor_prompt.txt","r").read())
     supervisor.compile(checkpointer=memory)
     return supervisor
