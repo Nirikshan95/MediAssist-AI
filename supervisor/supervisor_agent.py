@@ -1,19 +1,28 @@
-from langgraph.graph import StateGraph,END,add_messages
+from langgraph.graph import StateGraph, END, add_messages
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph_supervisor import create_supervisor
-from typing import TypedDict,Annotated
+from agents.symptom_collector_agent import Create_symptoms_collector_agent
+from typing import TypedDict, Annotated
+from config.settings import DEEPSEEK
+from utils.model_loader import load_model
 import sqlite3
 import os
 
 # Agent state
 class AgentState(TypedDict):
-    messages: Annotated[list[str],add_messages]
+    messages: Annotated[list, add_messages]  # Changed from list[str] to list
+    symptoms: Annotated[list, add_messages]  # Added symptoms field
 
-# database connetion
-conn=sqlite3.connect('supervisor_agent.db',check_same_thread=False)
-memory=SqliteSaver(conn=conn)
+# database connection
+conn = sqlite3.connect('supervisor_agent.db', check_same_thread=False)
+memory = SqliteSaver(conn=conn)
 
-def create_supervisor_agent(agents,llm):
-    supervisor=create_supervisor(supervisor_name="MedAssist",agents=agents,model=llm,prompt=open("prompts/supervisor_prompt.txt","r").read())
-    supervisor.compile(checkpointer=memory)
+def agent_supervisor():
+    workflow = create_supervisor(
+        supervisor_name="MedAssist",
+        agents=[Create_symptoms_collector_agent(AgentState)],
+        model=load_model(model_id=DEEPSEEK),
+        prompt=open("prompts/supervisor_prompt.txt", "r").read()
+    )
+    supervisor = workflow.compile(checkpointer=memory)
     return supervisor
