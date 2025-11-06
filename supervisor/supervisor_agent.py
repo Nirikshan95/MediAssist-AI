@@ -3,7 +3,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph_supervisor import create_supervisor
 from agents.symptom_collector_agent import Create_symptoms_collector_agent
 from typing import TypedDict, Annotated
-from config.settings import DEEPSEEK
+from config.settings import GPT_OSS
 from utils.model_loader import load_model
 import sqlite3
 import os
@@ -19,10 +19,10 @@ memory = SqliteSaver(conn=conn)
 
 def agent_supervisor():
     workflow = create_supervisor(
-        supervisor_name="MedAssist",
+        supervisor_name="MediAssist Supervisor",
         agents=[Create_symptoms_collector_agent(AgentState)],
-        model=load_model(model_id=DEEPSEEK),
-        prompt=open("prompts/supervisor_prompt.txt", "r").read()
+        model=load_model(model_id=GPT_OSS),
+        prompt=open("prompts/supervisor_prompt.txt", "r").read(),
     )
     supervisor = workflow.compile(checkpointer=memory)
     return supervisor
