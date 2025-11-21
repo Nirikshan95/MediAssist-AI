@@ -4,5 +4,8 @@ based on the available symptoms list ask the symptoms
 here the symptoms list which are already told by patient:
 {symptoms}
 
+here the sliding window conversations:
+{messages}
+
 strictly follow the following format instrctions to ask the question:
 {format_instructions}

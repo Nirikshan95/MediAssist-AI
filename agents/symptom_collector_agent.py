@@ -25,23 +25,22 @@ class SymptomCollector:
     def symptoms_collect(self,state):
         print(f"symptoms :\n\n{state['symptoms']}\n\n messages:\n\n{state['messages']}")
         prompt_template = PromptTemplate(
-            input_variables=["symptoms"],
+            input_variables=["messages","symptoms"],
             template=self.prompt,
             partial_variables={"format_instructions":parser.get_format_instructions()}
         )
         chain=prompt_template|self.chat_model|parser
-        response=chain.invoke({"symptoms":state["symptoms"]})
+        response=chain.invoke({"symptoms":state["symptoms"],"messages":state["messages"][-8:]})
         print("Symptom Collector Response:",response.question)
         #print("\n\n state messages:",state["messages"])
+        symptom=None
         for msg in state["messages"][::-1]:
             if isinstance(msg,HumanMessage):
-                self.symptom=msg.content
+                symptom=msg.content
                 break
-            else:
-                self.symptom=None
-                print("No HumanMessage found in messages.")
-                
-        return {"messages":AIMessage(content=response.question),"symptoms":[self.symptom] if self.symptom else []}
+        if symptom==None:
+            print("No HumanMessage found in messages.")
+        return {"messages":[AIMessage(content=response.question)],"symptoms":[symptom] if symptom else []}
 def Create_symptoms_collector_agent(state):
     print("we are in symptoms collector agent")
     graph=StateGraph(state)
