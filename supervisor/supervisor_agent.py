@@ -33,3 +33,30 @@ def agent_supervisor():
     )
     supervisor = workflow.compile(checkpointer=memory)
     return supervisor
+
+
+def save_workflow_visualization():
+    # 1. Get the compiled graph (app)
+    app = agent_supervisor()
+    
+    print("Generating graph visualization...")
+    try:
+        # 2. Generate the PNG image using Mermaid API
+        # This requires an internet connection to reach mermaid.ink
+        graph_image = app.get_graph().draw_mermaid_png()
+        
+        # 3. Save to a file
+        output_file = "workflow_graph.png"
+        with open(output_file, "wb") as f:
+            f.write(graph_image)
+            
+        print(f"✅ Successfully saved workflow graph to {output_file}")
+        
+    except Exception as e:
+        print(f"❌ Error generating graph: {e}")
+        # Fallback: Print the Mermaid syntax
+        print("\nMermaid Syntax (copy to https://mermaid.live):")
+        print(app.get_graph().draw_mermaid())
+
+if __name__ == "__main__":
+    save_workflow_visualization()

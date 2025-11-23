@@ -13,6 +13,7 @@ class SymptomCollectorState:
         
 class SymptomCollectorSchema(BaseModel):
     question: Annotated[str, "The question to ask the user about their symptoms"]
+    new_symptoms: Annotated[list[str], "The new symptoms collected from the user"]
 
 parser = PydanticOutputParser(pydantic_object=SymptomCollectorSchema)
 
@@ -33,14 +34,13 @@ class SymptomCollector:
         response=chain.invoke({"symptoms":state["symptoms"],"messages":state["messages"][-8:]})
         print("Symptom Collector Response:",response.question)
         #print("\n\n state messages:",state["messages"])
-        symptom=None
-        for msg in state["messages"][::-1]:
-            if isinstance(msg,HumanMessage):
-                symptom=msg.content
-                break
-        if symptom==None:
-            print("No HumanMessage found in messages.")
-        return {"messages":[AIMessage(content=response.question)],"symptoms":[symptom] if symptom else []}
+        try:
+            if response.new_symptoms and response.question:
+                return {"messages":[AIMessage(content=response.question)],"symptoms":[response.new_symptoms],"question":response.question}
+        except:
+            raise ValueError("new_symptoms/question is not available in response")
+            return
+
 def Create_symptoms_collector_agent(state):
     print("we are in symptoms collector agent")
     graph=StateGraph(state)

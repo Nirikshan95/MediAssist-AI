@@ -31,10 +31,15 @@ class Diagnosis:
         chain=prompt_template|self.chat_model|parser
         response=chain.invoke({"symptoms":state["symptoms"],"messages":state["messages"][-8:]})
         print("\n\n Diagnosis need more symptoms:\n",response.need_more_symptoms,"\n diagnosis:",response.diagnosis)
-        return {
-            "messages":[AIMessage(content=response.question)],
-            "diagnosis":[response.diagnosis] if response.diagnosis else [None],
-            "need_more_symptoms":[response.need_more_symptoms] if response.need_more_symptoms else [False]}
+        if response.need_more_symptoms:
+            return {
+                "messages":[AIMessage(content="need more symptoms to diagnose the issue")],
+                "need_more_symptoms":response.need_more_symptoms}
+        else:
+            return {
+                "messages":[AIMessage(content=response.diagnosis)],
+                "diagnosis":response.diagnosis if response.diagnosis else "",
+                "need_more_symptoms":response.need_more_symptoms}
 def Create_diagnosis_agent(state):
     print("we are in diagnosis agent")
     graph=StateGraph(state)
